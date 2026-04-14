@@ -59,7 +59,7 @@ void draw_player_choice(void)
     int screen_height = gfx_ysize();
     int panel_x       = (screen_width - PANEL_WIDTH) / 2;
     int btn_x         = panel_x + 20;
-    int panel_y       = screen_height / 2 - CHOICE_PANEL_ABOVE_CENTRE;
+    int panel_y       = (screen_height - CHOICE_PANEL_HEIGHT) / 2;
 
     int road_y = screen_height * 72 / 100;
     theme_draw_minion(MINION_LEFT_X,
@@ -70,11 +70,29 @@ void draw_player_choice(void)
     theme_draw_panel(panel_x, panel_y, PANEL_WIDTH, CHOICE_PANEL_HEIGHT);
 
     {
-        const char *title   = "WORD SCRAMBLE";
-        int         title_w = (int)strlen(title) * 8 * 2;
-        int         title_x = panel_x + (PANEL_WIDTH - title_w) / 2;
-        int         title_y = panel_y + CHOICE_TITLE_INSIDE_Y;
-        theme_draw_title(title, title_x, title_y, 2);
+        const char *title1   = "BELLO!";
+        int         title1_w = (int)strlen(title1) * 12;
+        int         title1_x = panel_x + (PANEL_WIDTH - title1_w) / 2;
+        int         title1_y = panel_y + CHOICE_TITLE_INSIDE_Y;
+        theme_draw_title(title1, title1_x, title1_y, 3);
+    }
+
+    {
+        const char *title2   = "Scramble Blast";
+        int         title2_w = (int)strlen(title2) * 10;
+        int         title2_x = panel_x + (PANEL_WIDTH - title2_w) / 2;
+        int         title2_y = panel_y + CHOICE_TITLE2_INSIDE_Y;
+        theme_draw_title(title2, title2_x, title2_y, 2);
+    }
+
+    {
+        const char *friendly = "A silly word puzzle for smart Minions!";
+        int         friendly_w = (int)strlen(friendly) * 9;
+        if (friendly_w > PANEL_WIDTH - 40)
+            friendly_w = PANEL_WIDTH - 40;
+        int         friendly_x = panel_x + (PANEL_WIDTH - friendly_w) / 2;
+        int         friendly_y = panel_y + CHOICE_FRIENDLY_INSIDE_Y;
+        theme_draw_label(friendly, friendly_x, friendly_y);
     }
 
     theme_draw_divider(panel_x + 20,
@@ -82,8 +100,8 @@ void draw_player_choice(void)
                        PANEL_WIDTH - 40);
 
     {
-        const char *subtitle   = "Choose how to continue:";
-        int         subtitle_w = (int)strlen(subtitle) * 8;
+        const char *subtitle   = "Let's get started!";
+        int         subtitle_w = (int)strlen(subtitle) * 9;
         int         subtitle_x = panel_x + (PANEL_WIDTH - subtitle_w) / 2;
         int         subtitle_y = panel_y + CHOICE_SUBTITLE_INSIDE_Y;
         theme_draw_subtitle(subtitle, subtitle_x, subtitle_y);
@@ -91,14 +109,19 @@ void draw_player_choice(void)
 
     int btn1_y = panel_y + CHOICE_BTN1_INSIDE_Y;
     int btn2_y = btn1_y + BTN_HEIGHT + CHOICE_BTN_GAP;
+    int btn3_y = btn2_y + BTN_HEIGHT + CHOICE_BTN_GAP;
 
     theme_draw_button(btn_x, btn1_y,
                       BTN_WIDTH, BTN_HEIGHT,
-                      COL_BTN_GREEN, "NEW PLAYER");
+                      COL_BTN_GREEN, "CREATE MINION");
 
     theme_draw_button(btn_x, btn2_y,
                       BTN_WIDTH, BTN_HEIGHT,
-                      COL_BTN_DEFAULT, "EXISTING PLAYER");
+                      COL_BTN_DEFAULT, "SELECT MINION");
+
+    theme_draw_button(btn_x, btn3_y,
+                      BTN_WIDTH, BTN_HEIGHT,
+                      COL_BTN_RED, "EXIT");
 }
 
 void draw_player_old(void)
@@ -159,9 +182,10 @@ int select_player_choice_handle_click(int mouse_x, int mouse_y)
     int screen_height = gfx_ysize();
     int panel_x       = (screen_width - PANEL_WIDTH) / 2;
     int btn_x         = panel_x + 20;
-    int panel_y       = screen_height / 2 - CHOICE_PANEL_ABOVE_CENTRE;
+    int panel_y       = (screen_height - CHOICE_PANEL_HEIGHT) / 2;
     int btn1_y        = panel_y + CHOICE_BTN1_INSIDE_Y;
     int btn2_y        = btn1_y + BTN_HEIGHT + CHOICE_BTN_GAP;
+    int btn3_y        = btn2_y + BTN_HEIGHT + CHOICE_BTN_GAP;
 
     int click_in_column =
         mouse_x >= btn_x &&
@@ -175,6 +199,10 @@ int select_player_choice_handle_click(int mouse_x, int mouse_y)
         else if (mouse_y >= btn2_y && mouse_y < btn2_y + BTN_HEIGHT) {
             play_sound("menu_click.wav");
             return 2;
+        }
+        else if (mouse_y >= btn3_y && mouse_y < btn3_y + BTN_HEIGHT) {
+            play_sound("menu_click.wav");
+            return 3;
         }
     }
     return 0;

@@ -3,15 +3,17 @@
 
 #include "theme.h"
 
-#define PANEL_WIDTH               420
+#define PANEL_WIDTH               520
 
-#define CHOICE_PANEL_HEIGHT       230
+#define CHOICE_PANEL_HEIGHT       460
 #define CHOICE_PANEL_ABOVE_CENTRE 130
-#define CHOICE_TITLE_INSIDE_Y      28
-#define CHOICE_DIVIDER_INSIDE_Y    52
-#define CHOICE_SUBTITLE_INSIDE_Y   68
-#define CHOICE_BTN1_INSIDE_Y      100
-#define CHOICE_BTN_GAP             14
+#define CHOICE_TITLE_INSIDE_Y      32
+#define CHOICE_TITLE2_INSIDE_Y     96
+#define CHOICE_FRIENDLY_INSIDE_Y  142
+#define CHOICE_DIVIDER_INSIDE_Y   188
+#define CHOICE_SUBTITLE_INSIDE_Y  222
+#define CHOICE_BTN1_INSIDE_Y      250
+#define CHOICE_BTN_GAP             24
 
 #define NEW_PANEL_HEIGHT           240
 #define NEW_PANEL_ABOVE_CENTRE     120

@@ -96,6 +96,10 @@ GameState player_handle_click(int mouse_x, int mouse_y)
             select_player_load_saved_names();
             current_mode = MODE_OLD;
         }
+        else if (action == 3)
+        {
+            return STATE_EXIT;
+        }
     }
     else if (current_mode == MODE_NEW)
     {
