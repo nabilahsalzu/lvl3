@@ -46,10 +46,10 @@
 
 /* Inside the main menu panel */
 #define MENU_TITLE_INSIDE_Y       34
-#define MENU_DIVIDER_INSIDE_Y     52
-#define MENU_GREETING_INSIDE_Y    64
-#define MENU_FIRST_BTN_INSIDE_Y   92
-#define MENU_BTN_GAP              15   /* gap between buttons          */
+#define MENU_DIVIDER_INSIDE_Y     65
+#define MENU_GREETING_INSIDE_Y    78
+#define MENU_FIRST_BTN_INSIDE_Y   100
+#define MENU_BTN_GAP              18   /* gap between buttons          */
 
 /* "Change Player" button below the main menu panel */
 #define CHANGE_PLAYER_BTN_WIDTH  180
@@ -67,8 +67,8 @@
 /* Inside the help panel */
 #define HELP_TITLE_INSIDE_Y       34
 #define HELP_DIVIDER_INSIDE_Y     52
-#define HELP_FIRST_LINE_INSIDE_Y  68
-#define HELP_LINE_SPACING         26   /* vertical gap between lines   */
+#define HELP_FIRST_LINE_INSIDE_Y  80
+#define HELP_LINE_SPACING         36   /* vertical gap between lines   */
 
 /* BACK button gap below panels */
 #define BACK_BTN_GAP_BELOW        16
@@ -112,10 +112,10 @@ void draw_menu(void)
 
     theme_draw_panel(panel_x, panel_y, PANEL_WIDTH, MENU_PANEL_HEIGHT);
 
-    /* Title — "WORD SCRAMBLE" centred */
+    /* Title — "MINION SCRAMBLE" centred */
     {
-        const char *title   = "WORD SCRAMBLE";
-        int         title_w = (int)strlen(title) * 8 * 2;
+        const char *title   = "MINION SCRAMBLE";
+        int         title_w = (int)strlen(title) * 6 * 2;
         int         title_x = panel_x + (PANEL_WIDTH - title_w) / 2;
         int         title_y = panel_y + MENU_TITLE_INSIDE_Y;
         theme_draw_title(title, title_x, title_y, 2);
@@ -125,10 +125,10 @@ void draw_menu(void)
                        panel_y + MENU_DIVIDER_INSIDE_Y,
                        PANEL_WIDTH - 40);
 
-    /* Greeting — "Hello, [player name]!" centred */
+    /* Greeting — "Bello, [player name]!" centred */
     {
         char greeting[48];
-        sprintf(greeting, "Hello, %s!", current_player.name);
+        sprintf(greeting, "Bello minion '%s'", current_player.name);
         int greeting_w = (int)strlen(greeting) * 8;
         int greeting_x = panel_x + (PANEL_WIDTH - greeting_w) / 2;
         int greeting_y = panel_y + MENU_GREETING_INSIDE_Y;
@@ -141,28 +141,28 @@ void draw_menu(void)
 
     theme_draw_button(btn_x, first_btn_y,
                       BTN_WIDTH, BTN_HEIGHT,
-                      COL_BTN_GREEN, "New Game");
+                      COL_BTN_GOLD, "New Mission");
 
     theme_draw_button(btn_x, first_btn_y + btn_step,
                       BTN_WIDTH, BTN_HEIGHT,
-                      COL_BTN_DEFAULT, "How to Play");
+                      COL_BTN_DEFAULT, "Minion Training");
 
     theme_draw_button(btn_x, first_btn_y + btn_step * 2,
                       BTN_WIDTH, BTN_HEIGHT,
-                      COL_BTN_DEFAULT, "Score Board");
+                      COL_BTN_DEFAULT, "Top Minions");
 
     theme_draw_button(btn_x, first_btn_y + btn_step * 3,
                       BTN_WIDTH, BTN_HEIGHT,
-                      COL_BTN_RED, "Exit");
+                      COL_BTN_RED, "Leave Lab");
 
-    /* "Change Player" outline button below the panel */
+    /* "Change Minion" outline button below the panel */
     {
         int change_btn_x = screen_width / 2 - CHANGE_PLAYER_BTN_WIDTH / 2;
         int change_btn_y = panel_y + MENU_PANEL_HEIGHT + CHANGE_PLAYER_BTN_GAP;
         theme_draw_button_outline(change_btn_x, change_btn_y,
                                   CHANGE_PLAYER_BTN_WIDTH,
                                   THEME_BTN_H_SMALL,
-                                  255, 215, 0, "Change Player");
+                                  255, 215, 0, "Change minion");
     }
 }
 
@@ -241,8 +241,8 @@ void draw_help(void)
 
     /* Title */
     {
-        const char *title   = "HOW TO PLAY";
-        int         title_w = (int)strlen(title) * 8 * 2;
+        const char *title   = "MINION TRAINING";
+        int         title_w = (int)strlen(title) * 6 * 2;
         int         title_x = panel_x + (PANEL_WIDTH - title_w) / 2;
         int         title_y = panel_y + HELP_TITLE_INSIDE_Y;
         theme_draw_title(title, title_x, title_y, 2);
@@ -252,24 +252,26 @@ void draw_help(void)
                        panel_y + HELP_DIVIDER_INSIDE_Y,
                        PANEL_WIDTH - 40);
 
-    /* Instruction lines */
+    /* Instruction lines centered */
     int line_y = panel_y + HELP_FIRST_LINE_INSIDE_Y;
-    theme_draw_label("Click scrambled tiles to build a word.",
-                     text_x, line_y);
-    theme_draw_label("Each tile fills the next empty slot.",
-                     text_x, line_y + HELP_LINE_SPACING);
-    theme_draw_label("Click a filled slot to remove it.",
-                     text_x, line_y + HELP_LINE_SPACING * 2);
-    theme_draw_label("Correct answer = +10 points.",
-                     text_x, line_y + HELP_LINE_SPACING * 3);
-    theme_draw_label("3 lives and 25 seconds per word.",
-                     text_x, line_y + HELP_LINE_SPACING * 4);
+    const char *lines[] = {
+        "Click scrambled letters to find the word.",
+        "Each letter drops into the next slot.",
+        "Click a filled slot to kick it out.",
+        "Correct answer = +10 bananas!",
+        "3 lives and 25 seconds per word."
+    };
+    for (int i = 0; i < 5; i++) {
+        int line_w = (int)strlen(lines[i]) * 6;
+        int center_x = panel_x + (PANEL_WIDTH - line_w) / 2;
+        theme_draw_label(lines[i], center_x, line_y + i * HELP_LINE_SPACING);
+    }
 
     /* BACK button */
     int back_btn_y = panel_y + HELP_PANEL_HEIGHT + BACK_BTN_GAP_BELOW;
     theme_draw_button(panel_x + 20, back_btn_y,
                       BTN_WIDTH, BTN_HEIGHT,
-                      COL_BTN_GREY, "BACK");
+                      COL_BTN_GOLD, "BACK TO LAB");
 }
 
 /* ================================================================
