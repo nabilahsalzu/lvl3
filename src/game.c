@@ -22,7 +22,7 @@
 #define TILE_SIZE_BIG    50   /* tile px — short words               */
 #define TILE_SIZE_SMALL  26   /* tile px — long words                */
 #define TILE_GAP          8   /* px gap between tiles                */
-#define TIME_PER_WORD    25   /* seconds per word                    */
+#define TIME_PER_WORD    10   /* seconds per word                    */
 #define TOTAL_LIVES       3   /* hearts at start                     */
 
 /* ================================================================
@@ -232,6 +232,10 @@ void load_words_from_file(const char *filename)
         strcpy(word_pool[i], word_pool[j]);
         strcpy(word_pool[j], t);
     }
+    
+    if (pool_size > 20) {
+        pool_size = 20;
+    }
 }
 
 static void scramble_word(char *word)
@@ -267,14 +271,16 @@ static void check_answer(void)
         sprintf(feedback_msg, "CORRECT!  +10 Points");
         play_sound("correct.wav");
         showing_feedback = 1;
-        feedback_expiry  = time(NULL) + 1;
+        feedback_expiry  = time(NULL) + 3;
     } else {
         lives--;
         sprintf(feedback_msg, "WRONG!  Answer: %s", current_word);
         play_sound("wrong.wav");
         showing_feedback = 1;
-        feedback_expiry  = time(NULL) + 2;
+        feedback_expiry  = time(NULL) + 3;
     }
+    
+    draw_game(); /* Force full repaint to show feedback banner immediately */
 }
 
 /* ================================================================
@@ -282,7 +288,7 @@ static void check_answer(void)
    ================================================================ */
 static void do_hint(void)
 {
-    if (hint_count >= tile_count) return;
+    if (hint_count >= 1) return; /* HINT button can be used once only per word */
 
     int  target_slot    = hint_count;
     char needed_letter  = current_word[hint_count];
@@ -340,10 +346,10 @@ void game_init_with_file(const char *filename)
     srand((unsigned)time(NULL));
     load_words_from_file(filename);
 
-    if      (strstr(filename, "puzzle1.txt")) strcpy(current_category, "HOME & COLORS");
-    else if (strstr(filename, "puzzle2.txt")) strcpy(current_category, "NATURE & SCHOOL");
-    else if (strstr(filename, "puzzle3.txt")) strcpy(current_category, "TECH & SCIENCE");
-    else                                      strcpy(current_category, "RANDOM MIX");
+    if      (strstr(filename, "puzzle1.txt")) strcpy(current_category, "GRU'S HOME & LAB");
+    else if (strstr(filename, "puzzle2.txt")) strcpy(current_category, "MINION WORLD TOUR");
+    else if (strstr(filename, "puzzle3.txt")) strcpy(current_category, "DR. NEFARIO'S TECH");
+    else                                      strcpy(current_category, "BANANA SURPRISE");
 
     score            = 0;
     lives            = TOTAL_LIVES;
@@ -427,6 +433,13 @@ void draw_game(void)
     int cat_x = sw / 2 - cat_w / 2;
     gfx_color(0,   0,   0);   gfx_text(cat, cat_x+1, hud_ty+1, 1);
     gfx_color(215, 228, 255); gfx_text(cat, cat_x,   hud_ty,   1);
+
+    char qnum[32];
+    sprintf(qnum, "%d/%d", word_idx, pool_size);
+    int qnum_w = (int)strlen(qnum) * 8;
+    int qnum_x = sw - HUD_LEFT_PAD - qnum_w - 10;
+    gfx_color(0,   0,   0);   gfx_text(qnum, qnum_x+1, hud_ty+1, 1);
+    gfx_color(155, 195, 255); gfx_text(qnum, qnum_x,   hud_ty,   1);
 
     /* ── Hearts + score ────────────────────────────────── */
     int lives_ty = LIVES_ROW_Y + 4;
@@ -515,13 +528,7 @@ void draw_game(void)
 
     theme_draw_button(clear_x, btn_y, BTN_W, BTN_H, COL_BTN_RED,     "CLEAR");
     theme_draw_button(hint_x,  btn_y, BTN_W, BTN_H, COL_BTN_DEFAULT, "HINT");
-    theme_draw_button(menu_x,  btn_y, BTN_W, BTN_H, 80, 60, 150,     "MENU");
-
-    /* Hint counter below HINT button */
-    char hbuf[12]; sprintf(hbuf, "[%d/%d]", hint_count, tile_count);
-    int hbuf_w = (int)strlen(hbuf) * 8;
-    gfx_color(100, 150, 255);
-    gfx_text(hbuf, hint_x + (BTN_W - hbuf_w)/2, btn_y + BTN_H + 4, 1);
+    theme_draw_button(menu_x,  btn_y, BTN_W, BTN_H, 80, 60, 150,     "QUIT");
 
     /* ── Feedback ───────────────────────────────────────── */
     if (showing_feedback) {
@@ -586,6 +593,12 @@ void draw_tiles_only(void)
     gfx_color(0,   0,   0);   gfx_text(cat, cat_x+1, hud_ty+1, 1);
     gfx_color(215, 228, 255); gfx_text(cat, cat_x,   hud_ty,   1);
 
+    char qnum[32]; sprintf(qnum, "%d/%d", word_idx, pool_size);
+    int qnum_w = (int)strlen(qnum) * 8;
+    int qnum_x = sw - HUD_LEFT_PAD - qnum_w - 10;
+    gfx_color(0,   0,   0);   gfx_text(qnum, qnum_x+1, hud_ty+1, 1);
+    gfx_color(155, 195, 255); gfx_text(qnum, qnum_x,   hud_ty,   1);
+
     /* repaint lives + score */
     int y;
     for (y = LIVES_ROW_Y; y < LIVES_ROW_Y + 24; y++) {
@@ -648,8 +661,13 @@ GameState game_handle_input(char event)
     if (mx >= clear_btn.x && mx <= clear_btn.x + clear_btn.w &&
         my >= clear_btn.y && my <= clear_btn.y + clear_btn.h) {
         int i;
-        for (i = 0; i < tile_count; i++) { tile_used[i] = 0; answer_slots[i] = -1; }
-        slots_filled = 0; hint_count = 0;
+        for (i = hint_count; i < tile_count; i++) { 
+            if (answer_slots[i] != -1) {
+                tile_used[answer_slots[i]] = 0; 
+                answer_slots[i] = -1; 
+            }
+        }
+        slots_filled = hint_count;
         play_sound("click.wav");
         return STATE_PLAYING;
     }
@@ -718,6 +736,7 @@ GameState game_update(void)
                 result_set_end_reason(0); stop_bg_music(); return STATE_RESULT;
             }
             load_next_word();
+            draw_game(); /* Force repaint for the new word */
         }
         return STATE_PLAYING;
     }
@@ -726,8 +745,9 @@ GameState game_update(void)
     if (elapsed >= time_limit) {
         lives--;
         sprintf(feedback_msg, "TIME'S UP!  Answer: %s", current_word);
-        showing_feedback = 1; feedback_expiry = time(NULL) + 2;
+        showing_feedback = 1; feedback_expiry = time(NULL) + 3;
         play_sound("timeout.wav");
+        draw_game(); /* Force full repaint to show timeout feedback immediately */
     }
 
     if (lives <= 0 && !showing_feedback) {

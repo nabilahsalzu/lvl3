@@ -892,8 +892,9 @@ void theme_draw_tile(int x, int y, int size, char letter, int clicked)
 void theme_draw_feedback(const char *message, int is_correct,
                          int screen_w, int y)
 {
-    int banner_w   = (int)strlen(message) * 8 + 48;
-    int banner_h   = 36;
+    /* Increased panel size and text scale */
+    int banner_w   = (int)strlen(message) * 16 + 80;
+    int banner_h   = 60;
     int banner_x   = (screen_w - banner_w) / 2;
     int text_x, text_y;
 
@@ -920,14 +921,14 @@ void theme_draw_feedback(const char *message, int is_correct,
     gfx_fillrectangle(banner_x,              y,              2, banner_h);
     gfx_fillrectangle(banner_x + banner_w - 2, y,            2, banner_h);
 
-    /* Message text centred */
-    text_x = banner_x + (banner_w - (int)strlen(message) * 8) / 2;
-    text_y = y + (banner_h + 8) / 2 - 4;
+    /* Message text centred (scale 2) */
+    text_x = banner_x + (banner_w - (int)strlen(message) * 16) / 2;
+    text_y = y + (banner_h + 16) / 2 - 8;
 
     SET_COLOR(0, 0, 0);
-    gfx_text((char *)message, text_x + 1, text_y + 1, 1);
+    gfx_text((char *)message, text_x + 2, text_y + 2, 2);
     SET_COLOR(255, 255, 255);
-    gfx_text((char *)message, text_x, text_y, 1);
+    gfx_text((char *)message, text_x, text_y, 2);
 }
 
 /* ================================================================
@@ -962,16 +963,18 @@ void theme_draw_timer_bar(int time_left, int time_max,
     else if (time_left > time_max / 5)     { r = 235; g = 145; b = 0;   }
     else                                   { r = 210; g = 28;  b = 28;  }
 
-    /* Fill bar */
-    SET_COLOR(r, g, b);
-    gfx_fillrectangle(x + 1, y + 1, fill_width - 2, bar_h - 2);
+    if (fill_width > 2) {
+        /* Fill bar */
+        SET_COLOR(r, g, b);
+        gfx_fillrectangle(x + 1, y + 1, fill_width - 2, bar_h - 2);
 
-    /* Top shine stripe */
-    {
-        int shine_r = r + 62; if (shine_r > 255) shine_r = 255;
-        int shine_g = g + 52; if (shine_g > 255) shine_g = 255;
-        SET_COLOR(shine_r, shine_g, b);
-        gfx_fillrectangle(x + 1, y + 1, fill_width - 2, 3);
+        /* Top shine stripe */
+        {
+            int shine_r = r + 62; if (shine_r > 255) shine_r = 255;
+            int shine_g = g + 52; if (shine_g > 255) shine_g = 255;
+            SET_COLOR(shine_r, shine_g, b);
+            gfx_fillrectangle(x + 1, y + 1, fill_width - 2, 3);
+        }
     }
 
     /* Black border */
