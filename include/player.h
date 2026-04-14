@@ -4,18 +4,16 @@
 #include "state.h"
 
 typedef struct {
-char name[32];
-int high_score;
+    char name[32];
+    int high_score;
 } Player;
 
 extern Player current_player;
 
-void draw_player_select();
+void draw_player_select(void);
 void player_handle_key(char c);
-void save_player_data();
+void save_player_data(void);
 void load_player_data(const char* name);
-
 GameState player_handle_click(int mx, int my);
-
 
 #endif
