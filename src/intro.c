@@ -33,15 +33,15 @@
    ================================================================ */
 
 /* Info panel (the box at the top showing the category info) */
-#define INFO_PANEL_WIDTH        420   /* width of the panel in pixels          */
-#define INFO_PANEL_HEIGHT       220   /* height of the panel in pixels         */
+#define INFO_PANEL_WIDTH        660   /* width of the panel in pixels          */
+#define INFO_PANEL_HEIGHT       240   /* height of the panel in pixels         */
 #define INFO_PANEL_TOP_Y         30   /* how far from top of screen            */
 
 /* Inside the info panel */
-#define TITLE_INSIDE_Y           22   /* Y of category title inside panel      */
-#define DIVIDER_INSIDE_Y         50   /* Y of the divider line inside panel    */
-#define LINE1_INSIDE_Y           72   /* Y of story line 1 inside panel        */
-#define LINE2_INSIDE_Y          100   /* Y of story line 2 inside panel        */
+#define TITLE_INSIDE_Y           28   /* Y of category title inside panel      */
+#define DIVIDER_INSIDE_Y         65   /* Y of the divider line inside panel    */
+#define LINE1_INSIDE_Y          105   /* Y of story line 1 inside panel        */
+#define LINE2_INSIDE_Y          150   /* Y of story line 2 inside panel        */
 #define TEXT_LEFT_PADDING        20   /* how far text starts from panel left   */
 
 /* "I'M READY!" button */
@@ -99,24 +99,24 @@ void intro_init(const char *puzzle_filename)
          3 = Tech & Science
    ================================================================ */
 static const char *category_names[4] = {
-    "RANDOM MIX",
-    "HOME & COLORS",
-    "NATURE & SCHOOL",
-    "TECH & SCIENCE"
+    "BANANA SURPRISE",
+    "GRU'S HOME & LAB",
+    "MINION WORLD TOUR",
+    "DR. NEFARIO'S TECH"
 };
 
 static const char *category_story_line1[4] = {
-    "A wild mix of everything!",
-    "You are in a magic house!",
-    "You are in a forest behind your school!",
-    "You are in a futuristic computer lab!"
+    "A wild mix of everything minion!",
+    "Welcome to Gru's house!",
+    "Travel the world with the minions!",
+    "Welcome to Dr. Nefario's laboratory!"
 };
 
 static const char *category_story_line2[4] = {
-    "Are you ready for the challenge?",
-    "Unscramble things and colors!",
-    "Find nature and school words!",
-    "Help fix the robot — unscramble tech words!"
+    "Are you ready for the random challenge?",
+    "Unscramble items found in the lab!",
+    "Find the worldly minion words!",
+    "Help fix gadgets by unscrambling words!"
 };
 
 /* ================================================================
@@ -140,18 +140,17 @@ void draw_intro(void)
 
     /* ── Info panel ────────────────────────────────────────── */
     int panel_x = (screen_width - INFO_PANEL_WIDTH) / 2;
-    int panel_y = INFO_PANEL_TOP_Y;
+    int panel_y = screen_height / 2 - INFO_PANEL_HEIGHT / 2 - 30; // Centered, slightly up for button
 
     theme_draw_panel(panel_x, panel_y, INFO_PANEL_WIDTH, INFO_PANEL_HEIGHT);
 
     /* ── Category name as big title ────────────────────────── */
     {
         const char *category_name  = category_names[category_id];
-        int         name_length    = (int)strlen(category_name);
-        /* Each character at scale 2 is 16px wide (8px * 2) */
-        int         title_x        = screen_width / 2 - name_length * 8;
+        int         title_w        = (int)strlen(category_name) * 8 * 3;
+        int         title_x        = panel_x + (INFO_PANEL_WIDTH - title_w) / 2;
         int         title_y        = panel_y + TITLE_INSIDE_Y;
-        theme_draw_title(category_name, title_x, title_y, 2);
+        theme_draw_title(category_name, title_x, title_y, 3);
     }
 
     /* ── Divider line below title ───────────────────────────── */
@@ -160,13 +159,17 @@ void draw_intro(void)
                        INFO_PANEL_WIDTH - TEXT_LEFT_PADDING * 2);
 
     /* ── Story description lines ────────────────────────────── */
-    int text_x = panel_x + TEXT_LEFT_PADDING;
-    theme_draw_label(category_story_line1[category_id],
-                     text_x,
-                     panel_y + LINE1_INSIDE_Y);
-    theme_draw_label(category_story_line2[category_id],
-                     text_x,
-                     panel_y + LINE2_INSIDE_Y);
+    {
+        const char *l1 = category_story_line1[category_id];
+        const char *l2 = category_story_line2[category_id];
+
+        int l1_x = panel_x + (INFO_PANEL_WIDTH - (int)strlen(l1) * 8 * 2) / 2;
+        int l2_x = panel_x + (INFO_PANEL_WIDTH - (int)strlen(l2) * 8 * 2) / 2;
+
+        gfx_color(155, 195, 255);
+        gfx_text((char *)l1, l1_x, panel_y + LINE1_INSIDE_Y, 2);
+        gfx_text((char *)l2, l2_x, panel_y + LINE2_INSIDE_Y, 2);
+    }
 
     /* ── "I'M READY!" button centred below the panel ────────── */
     int ready_btn_x = screen_width / 2 - READY_BTN_WIDTH / 2;
@@ -175,6 +178,9 @@ void draw_intro(void)
     theme_draw_button(ready_btn_x, ready_btn_y,
                       READY_BTN_WIDTH, READY_BTN_HEIGHT,
                       COL_BTN_GREEN, "I'M READY!");
+
+    /* ── BACK button at top left ────────────────────────────── */
+    theme_draw_button(20, 20, 100, THEME_BTN_H, COL_BTN_GREY, "BACK");
 }
 
 /* ================================================================
@@ -186,10 +192,10 @@ GameState intro_handle_click(int mouse_x, int mouse_y)
 {
     int screen_width = gfx_xsize();
 
-    /* Calculate where the ready button is (same as in draw_intro) */
+    /* Calculate where the ready button is */
+    int panel_y = gfx_ysize() / 2 - INFO_PANEL_HEIGHT / 2 - 30;
     int ready_btn_x = screen_width / 2 - READY_BTN_WIDTH / 2;
-    int ready_btn_y = INFO_PANEL_TOP_Y + INFO_PANEL_HEIGHT
-                      + READY_BTN_GAP_BELOW_PANEL;
+    int ready_btn_y = panel_y + INFO_PANEL_HEIGHT + READY_BTN_GAP_BELOW_PANEL;
 
     /* Check if the click is inside the ready button */
     int clicked_inside_btn =
@@ -202,6 +208,13 @@ GameState intro_handle_click(int mouse_x, int mouse_y)
         play_sound("menu_click.wav");
         game_init_with_file(chosen_puzzle_file);
         return STATE_PLAYING;
+    }
+
+    /* Check if the click is inside the back button */
+    if (mouse_x >= 20 && mouse_x <= 20 + 100 &&
+        mouse_y >= 20 && mouse_y <= 20 + THEME_BTN_H) {
+        play_sound("menu_click.wav");
+        return STATE_CATEGORY;
     }
 
     return STATE_INTRO;   /* nothing clicked — stay on intro screen */

@@ -34,8 +34,8 @@
 
 /* Inside the panel */
 #define TITLE_INSIDE_Y            34
-#define DIVIDER_INSIDE_Y          52
-#define FIRST_BTN_INSIDE_Y        68
+#define DIVIDER_INSIDE_Y          65
+#define FIRST_BTN_INSIDE_Y        85
 #define BTN_GAP                   12   /* gap between category buttons */
 
 /* BACK button gap below panel */
@@ -73,10 +73,10 @@ typedef struct {
 } CategoryEntry;
 
 static const CategoryEntry category_list[NUM_CATEGORIES] = {
-    {  35, 130,  55, "1.  Home & Colors",   "data/puzzle1.txt" },
-    {  35, 130,  55, "2.  Nature & School", "data/puzzle2.txt" },
-    {   0,  80, 170, "3.  Tech & Science",  "data/puzzle3.txt" },
-    {  85,  60, 155, "4.  Random Mix",      NULL               }
+    {  35, 130,  55, "Gru's Home & Lab",    "data/puzzle1.txt" },
+    {  35, 130,  55, "Minion World Tour",   "data/puzzle2.txt" },
+    {   0,  80, 170, "Dr. Nefario's Tech",  "data/puzzle3.txt" },
+    {  85,  60, 155, "Banana surprise",     NULL               }
 };
 
 /* ================================================================
@@ -100,7 +100,7 @@ void draw_category_menu(void)
     /* Title — "SELECT CATEGORY" */
     {
         const char *title   = "SELECT CATEGORY";
-        int         title_w = (int)strlen(title) * 8 * 2;
+        int         title_w = (int)strlen(title) * 6 * 2;
         int         title_x = panel_x + (PANEL_WIDTH - title_w) / 2;
         int         title_y = panel_y + TITLE_INSIDE_Y;
         theme_draw_title(title, title_x, title_y, 2);
@@ -126,10 +126,8 @@ void draw_category_menu(void)
         }
     }
 
-    /* BACK button below panel */
-    int back_btn_y = panel_y + PANEL_HEIGHT + BACK_BTN_GAP_BELOW;
-    theme_draw_button(btn_x, back_btn_y,
-                      BTN_WIDTH, BTN_HEIGHT,
+    /* BACK button at top left */
+    theme_draw_button(20, 20, 100, BTN_HEIGHT,
                       COL_BTN_GREY, "BACK");
 }
 
@@ -170,13 +168,10 @@ GameState category_handle_click(int mouse_x, int mouse_y)
         }
     }
 
-    /* BACK button */
+    /* BACK button at top left */
     {
-        int back_btn_y = panel_y + PANEL_HEIGHT + BACK_BTN_GAP_BELOW;
-        if (mouse_x >= btn_x         &&
-            mouse_x <= btn_x + BTN_WIDTH &&
-            mouse_y >= back_btn_y     &&
-            mouse_y <  back_btn_y + BTN_HEIGHT) {
+        if (mouse_x >= 20 && mouse_x <= 20 + 100 &&
+            mouse_y >= 20 && mouse_y <  20 + BTN_HEIGHT) {
             play_sound("menu_click.wav");
             return STATE_MENU;
         }
