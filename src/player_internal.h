@@ -15,13 +15,13 @@
 #define CHOICE_BTN1_INSIDE_Y      250
 #define CHOICE_BTN_GAP             24
 
-#define NEW_PANEL_HEIGHT           240
+#define NEW_PANEL_HEIGHT           320
 #define NEW_PANEL_ABOVE_CENTRE     120
 #define NEW_TITLE_INSIDE_Y          28
 #define NEW_DIVIDER_INSIDE_Y        52
 #define NEW_INPUT_INSIDE_Y          68
 #define NEW_INPUT_HEIGHT             42
-#define NEW_CONFIRM_BTN_GAP         16
+#define NEW_CONFIRM_BTN_GAP         24
 
 #define BACK_BTN_X        THEME_MARGIN
 #define BACK_BTN_Y        (THEME_MARGIN + 8)

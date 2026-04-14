@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "player_internal.h"
 #include "player.h"
 #include "gfx.h"
@@ -9,6 +12,7 @@
 
 static char name_input_text[32] = "";
 static int  name_input_length   = 0;
+static int  name_duplicate_error = 0;
 
 static void play_sound(const char *sound_filename)
 {
@@ -17,10 +21,51 @@ static void play_sound(const char *sound_filename)
     system(command);
 }
 
+static void ensure_players_folder_exists(void)
+{
+    struct stat folder_info = { 0 };
+    if (stat("players", &folder_info) == -1)
+        mkdir("players", 0700);
+}
+
+static int is_name_taken(void)
+{
+    if (name_input_length == 0)
+        return 0;
+
+    ensure_players_folder_exists();
+
+    DIR *folder = opendir("players");
+    if (!folder)
+        return 0;
+
+    struct dirent *entry;
+    while ((entry = readdir(folder)) != NULL)
+    {
+        char *dot_txt = strstr(entry->d_name, ".txt");
+        if (!dot_txt)
+            continue;
+
+        int entry_name_len = (int)(dot_txt - entry->d_name);
+        if (entry_name_len != name_input_length)
+            continue;
+
+        if (strncasecmp(entry->d_name, name_input_text, name_input_length) == 0)
+        {
+            closedir(folder);
+            return 1;
+        }
+    }
+
+    closedir(folder);
+    return 0;
+}
+
 void new_player_reset(void)
 {
     name_input_length = 0;
     name_input_text[0] = '\0';
+    name_duplicate_error = 0;
 }
 
 void new_player_draw(void)
@@ -34,8 +79,8 @@ void new_player_draw(void)
     theme_draw_panel(panel_x, panel_y, PANEL_WIDTH, NEW_PANEL_HEIGHT);
 
     {
-        const char *title   = "ENTER NAME";
-        int         title_w = (int)strlen(title) * 8 * 2;
+        const char *title   = "NAME YOUR MINION";
+        int         title_w = (int)strlen(title) * 12;
         int         title_x = panel_x + (PANEL_WIDTH - title_w) / 2;
         int         title_y = panel_y + NEW_TITLE_INSIDE_Y;
         theme_draw_title(title, title_x, title_y, 2);
@@ -80,7 +125,29 @@ void new_player_draw(void)
         gfx_text(display_text, text_x, text_y, 1);
     }
 
-    int confirm_btn_y = input_box_y + input_box_h + NEW_CONFIRM_BTN_GAP;
+    const char *helper_text = "Minion names must be unique and fun!";
+    int helper_text_w = (int)strlen(helper_text) * 8;
+    int helper_text_x = input_box_x + (input_box_w - helper_text_w) / 2;
+    int helper_text_y = input_box_y + input_box_h + 28;
+    gfx_color(175, 225, 255);
+    gfx_text((char *)helper_text, helper_text_x, helper_text_y, 1);
+
+    int confirm_btn_y = helper_text_y + 22 + NEW_CONFIRM_BTN_GAP;
+    if (name_duplicate_error)
+    {
+        const char *error_text_line1 = "That Minion name already exists.";
+        const char *error_text_line2 = "Try another one.";
+        int error_text_line1_w = (int)strlen(error_text_line1) * 8;
+        int error_text_line2_w = (int)strlen(error_text_line2) * 8;
+        int error_text_x = input_box_x + (input_box_w - error_text_line1_w) / 2;
+        int error_text2_x = input_box_x + (input_box_w - error_text_line2_w) / 2;
+        int error_text_y = helper_text_y + 24;
+        gfx_color(255, 120, 120);
+        gfx_text((char *)error_text_line1, error_text_x, error_text_y, 1);
+        gfx_text((char *)error_text_line2, error_text2_x, error_text_y + 18, 1);
+        confirm_btn_y = error_text_y + 18 + 20 + NEW_CONFIRM_BTN_GAP;
+    }
+
     theme_draw_button(btn_x, confirm_btn_y,
                       BTN_WIDTH, BTN_HEIGHT,
                       COL_BTN_GREEN, "CONFIRM & START");
@@ -98,7 +165,11 @@ int new_player_handle_click(int mouse_x, int mouse_y)
     int btn_x         = panel_x + 20;
     int panel_y       = screen_height / 2 - NEW_PANEL_ABOVE_CENTRE;
     int input_box_y   = panel_y + NEW_INPUT_INSIDE_Y;
-    int confirm_btn_y = input_box_y + NEW_INPUT_HEIGHT + NEW_CONFIRM_BTN_GAP;
+
+    int helper_text_y = input_box_y + NEW_INPUT_HEIGHT + 28;
+    int confirm_btn_y = helper_text_y + 22 + NEW_CONFIRM_BTN_GAP;
+    if (name_duplicate_error)
+        confirm_btn_y += 42;
 
     int click_in_column =
         mouse_x >= btn_x &&
@@ -109,6 +180,10 @@ int new_player_handle_click(int mouse_x, int mouse_y)
         mouse_y <  confirm_btn_y + BTN_HEIGHT)
     {
         if (name_input_length > 0) {
+            if (is_name_taken()) {
+                name_duplicate_error = 1;
+                return 0;
+            }
             play_sound("menu_click.wav");
             load_player_data(name_input_text);
             save_player_data();
@@ -129,6 +204,8 @@ int new_player_handle_click(int mouse_x, int mouse_y)
 
 void new_player_handle_key(char key_pressed)
 {
+    name_duplicate_error = 0;
+
     if (key_pressed == 8 || key_pressed == 127) {
         if (name_input_length > 0) {
             name_input_length--;
