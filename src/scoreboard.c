@@ -40,7 +40,7 @@
    PANEL_HEADER_HEIGHT + (number_of_rows * SCORE_ROW_HEIGHT) + PANEL_FOOTER_HEIGHT */
 #define PANEL_HEADER_HEIGHT      80   /* space for title + divider + sub-label */
 #define PANEL_FOOTER_HEIGHT      20   /* padding below last row               */
-#define SCORE_ROW_HEIGHT         38   /* height of each score row             */
+#define SCORE_ROW_HEIGHT         44   /* height of each score row             */
 
 /* Inside the panel */
 #define TITLE_INSIDE_Y           28
@@ -155,7 +155,7 @@ void draw_scoreboard(void)
     {
         char title_text[64];
         sprintf(title_text, "%s's Scores", current_player.name);
-        int title_w = (int)strlen(title_text) * 8 * 2;
+        int title_w = (int)strlen(title_text) * 6 * 2;
         int title_x = panel_x + (PANEL_WIDTH - title_w) / 2;
         int title_y = panel_y + TITLE_INSIDE_Y;
         theme_draw_title(title_text, title_x, title_y, 2);
@@ -181,7 +181,7 @@ void draw_scoreboard(void)
     if (number_of_scores == 0) {
         /* No scores saved yet */
         const char *empty_msg   = "No scores yet — play a game first!";
-        int         empty_msg_w = (int)strlen(empty_msg) * 8;
+        int         empty_msg_w = (int)strlen(empty_msg) * 6;
         int         empty_msg_x = panel_x + (PANEL_WIDTH - empty_msg_w) / 2;
         theme_draw_subtitle(empty_msg, empty_msg_x, rows_y + 10);
     } else {

@@ -1020,21 +1020,23 @@ void theme_draw_score_row(int rank, int value,
     sprintf(rank_text,  "%d.", rank);
     sprintf(score_text, "%d",  value);
 
+    int text_y = y + 7;
+
     SET_COLOR(is_best ? 0 : 195, is_best ? 0 : 195, is_best ? 0 : 195);
-    gfx_text(rank_text,  x + 12, y + 23, 1);
+    gfx_text(rank_text,  x + 12, text_y, 1);
 
     SET_COLOR(is_best ? 0 : 252, is_best ? 0 : 252, is_best ? 0 : 252);
-    gfx_text(score_text, x + 45, y + 23, 1);
+    gfx_text(score_text, x + 45, text_y, 1);
 
     /* Badge label on the right */
     if (is_best && is_latest) {
         SET_COLOR(0, 0, 0);
-        gfx_text("BEST+LATEST", x + row_width - 112, y + 23, 1);
+        gfx_text("BEST+LATEST", x + row_width - 128, text_y, 1);
     } else if (is_best) {
         SET_COLOR(0, 0, 0);
-        gfx_text("BEST",        x + row_width - 42,  y + 23, 1);
+        gfx_text("BEST",        x + row_width - 58,  text_y, 1);
     } else if (is_latest) {
         SET_COLOR(255, 215, 0);
-        gfx_text("LATEST",      x + row_width - 58,  y + 23, 1);
+        gfx_text("LATEST",      x + row_width - 74,  text_y, 1);
     }
 }
